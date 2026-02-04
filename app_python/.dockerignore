@@ -1,0 +1,14 @@
+*.log
+*.py[cod]
+*.sqlite3
+.DS_Store
+.coverage/
+.env
+.idea/
+.pytest_cache/
+.vscode/
+ENV/
+ENVs/
+__pycache__/
+env/
+venv/

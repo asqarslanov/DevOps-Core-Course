@@ -24,6 +24,13 @@ python ./app.py
 PORT=8080 HOST=127.0.0.1 DEBUG=True python ./app.py
 ```
 
+## Docker (Containerization)
+
+This project can be containerized with Docker. The Dockerfile in this repository
+builds the application into a small, secure image and runs the FastAPI server.
+
+- DockerHub: [`asqarslanov/devops-lab02-python`](https://hub.docker.com/repository/docker/asqarslanov/devops-lab02-python/general)
+
 ## API Endpoints
 
 ### `GET /`
