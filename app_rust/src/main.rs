@@ -90,3 +90,13 @@ fn init_logging(config: &AppConfig) {
         .with(fmt_layer)
         .init();
 }
+
+#[cfg(test)]
+fn test_server() -> axum_test::TestServer {
+    axum_test::TestServer::new(
+        routes::router()
+            .with_state(AppState::init())
+            .into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .unwrap()
+}

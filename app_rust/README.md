@@ -1,5 +1,7 @@
 # DevOps Info Service (Rust)
 
+![CI Pipeline](https://github.com/asqarslanov/DevOps-Core-Course/actions/workflows/rust-ci.yml/badge.svg)
+
 A high-performance web service that provides system information and health
 status, implemented in Rust.
 
@@ -56,15 +58,27 @@ The service can be configured using environment variables:
 
 ## Testing
 
-Test the endpoints using `curl`:
+This project uses Rust's built-in test framework with `cargo test` and **Cargo
+Nextest** for faster test execution in CI.
+
+### Running Tests
 
 ```bash
-# Test main endpoint
-curl http://localhost:5000/
+# Standard cargo test
+cargo test
 
-# Test health endpoint
-curl http://localhost:5000/health
+# Faster tests with Nextest (recommended for CI)
+cargo nextest run
 ```
+
+### CI Testing
+
+The CI pipeline uses **Cargo Nextest** via the `taiki-e/install-action@nextest`
+action for improved performance:
+
+- Parallel test execution
+- Better failure output
+- Faster feedback loops
 
 ## Dependencies
 
