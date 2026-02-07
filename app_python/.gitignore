@@ -1,8 +1,12 @@
+.coverage
+
 # Python
 __pycache__/
 *.py[cod]
 venv/
 *.log
+.pytest_cache/
+.ruff_cache/
 
 # IDE
 .vscode/
