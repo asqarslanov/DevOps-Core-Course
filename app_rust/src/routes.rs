@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::net::SocketAddr;
 
 use axum::extract::{ConnectInfo, State};
@@ -7,7 +8,7 @@ use axum_extra::TypedHeader;
 use headers::UserAgent;
 use http::Uri;
 use jiff::Timestamp;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::state::AppState;
 
@@ -37,10 +38,10 @@ async fn handle_get(
 
     let response = GetResponse {
         service: ServiceInfo {
-            name: env!("CARGO_PKG_NAME"),
-            version: env!("CARGO_PKG_VERSION"),
-            description: env!("CARGO_PKG_DESCRIPTION"),
-            framework: "axum",
+            name: Cow::Borrowed(env!("CARGO_PKG_NAME")),
+            version: Cow::Borrowed(env!("CARGO_PKG_VERSION")),
+            description: Cow::Borrowed(env!("CARGO_PKG_DESCRIPTION")),
+            framework: Cow::Borrowed("axum"),
         },
         system: SystemInfo {
             hostname: sysinfo::System::host_name(),
@@ -48,7 +49,7 @@ async fn handle_get(
             platform_version: sysinfo::System::os_version(),
             architecture: sysinfo::System::cpu_arch(),
             cpu_count: sys.cpus().len(),
-            rust_version: "1.93",
+            rust_version: Cow::Borrowed("1.93"),
         },
         runtime: RuntimeInfo {
             uptime_seconds: uptime.get_seconds(),
@@ -64,14 +65,14 @@ async fn handle_get(
         },
         endpoints: vec![
             EndpointInfo {
-                path: "/",
+                path: Cow::Borrowed("/"),
                 method: http::Method::GET,
-                description: "Service information",
+                description: Cow::Borrowed("Service information"),
             },
             EndpointInfo {
-                path: "/health",
+                path: Cow::Borrowed("/health"),
                 method: http::Method::GET,
-                description: "Health check",
+                description: Cow::Borrowed("Health check"),
             },
         ],
     };
@@ -79,7 +80,7 @@ async fn handle_get(
     Json(response)
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct GetResponse {
     service: ServiceInfo,
     system: SystemInfo,
@@ -88,25 +89,25 @@ struct GetResponse {
     endpoints: Vec<EndpointInfo>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct ServiceInfo {
-    name: &'static str,
-    version: &'static str,
-    description: &'static str,
-    framework: &'static str,
+    name: Cow<'static, str>,
+    version: Cow<'static, str>,
+    description: Cow<'static, str>,
+    framework: Cow<'static, str>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct SystemInfo {
     hostname: Option<String>,
     platform: Option<String>,
     platform_version: Option<String>,
     architecture: String,
     cpu_count: usize,
-    rust_version: &'static str,
+    rust_version: Cow<'static, str>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct RuntimeInfo {
     uptime_seconds: i64,
     uptime_human: String,
@@ -114,13 +115,13 @@ struct RuntimeInfo {
     timezone: Timezone,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
 enum Timezone {
     Utc,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct RequestInfo {
     client_ip: SocketAddr,
 
@@ -133,12 +134,30 @@ struct RequestInfo {
     path: Uri,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct EndpointInfo {
-    path: &'static str,
+    path: Cow<'static, str>,
 
     #[serde(with = "http_serde::method")]
     method: http::Method,
 
-    description: &'static str,
+    description: Cow<'static, str>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn get() {
+        let server = crate::test_server();
+
+        let response = server
+            .get("/")
+            .add_header("User-Agent", <&str>::default())
+            .await;
+
+        response.assert_status_ok();
+        _ = response.json::<GetResponse>();
+    }
 }
