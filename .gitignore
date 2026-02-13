@@ -1,1 +1,73 @@
-test
+# Dependencies
+node_modules/
+*.pyc
+__pycache__/
+*.egg-info/
+.eggs/
+dist/
+build/
+*.so
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Testing
+coverage/
+htmlcov/
+.pytest_cache/
+.coverage
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.tfplan
+.terraform/
+terraform.tfvars
+*.tfvars
+.terraform.lock.hcl
+crash.log
+crash.*.log
+*.secret
+
+# Pulumi
+pulumi/venv/
+*.pyc
+__pycache__/
+Pulumi.*.yaml
+!Pulumi.yaml
+
+# Credentials
+*.pem
+*.key
+*.json
+credentials/
+secrets/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

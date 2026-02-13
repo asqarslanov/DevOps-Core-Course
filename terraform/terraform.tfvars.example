@@ -1,0 +1,8 @@
+# Copy this file to terraform.tfvars and fill in your values
+# IMPORTANT: terraform.tfvars is gitignored, do not commit actual values!
+
+# Your IP address for SSH access (more secure than 0.0.0.0/0)
+my_ip = "YOUR_IP_ADDRESS/32"
+
+# Path to your public SSH key
+public_key_path = "~/.ssh/id_rsa.pub"
