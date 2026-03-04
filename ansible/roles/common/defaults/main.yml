@@ -14,3 +14,4 @@ common_packages:
   - software-properties-common
 
 timezone: "UTC"
+common_users: []
