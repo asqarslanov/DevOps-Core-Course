@@ -1,0 +1,16 @@
+---
+app_name: devops-app
+docker_image: asqarslanov/devops-info-service
+docker_tag: latest
+
+app_port: 5000
+app_internal_port: 5000
+
+compose_project_dir: "/opt/{{ app_name }}"
+docker_compose_version: "3.8"
+
+app_restart_policy: unless-stopped
+app_container_name: "{{ app_name }}"
+app_env: {}
+
+web_app_wipe: false
