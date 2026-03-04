@@ -1,11 +1,11 @@
 ---
 - name: Full infrastructure setup and deployment
   hosts: webservers
-  become: yes
+  become: true
   vars_files:
     - ../group_vars/all.yml
 
   roles:
     - common
     - docker
-    - app_deploy
+    - web_app
