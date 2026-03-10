@@ -2,3 +2,6 @@
 fastapi==0.115
 python-dotenv==1.2.1
 uvicorn[standard]==0.32.0  # Includes performance extras
+
+# Structured Logging
+python-json-logger==2.0.7

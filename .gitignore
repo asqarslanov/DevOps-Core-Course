@@ -2,4 +2,5 @@
 .vault_pass
 ansible/.vault_pass
 ansible/inventory/*.pyc
+monitoring/.env
 test

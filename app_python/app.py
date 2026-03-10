@@ -4,6 +4,7 @@ Main application module
 """
 
 import datetime
+import logging
 import multiprocessing
 import os
 import platform
@@ -16,6 +17,30 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from pythonjsonlogger import jsonlogger
+
+
+class CustomJsonFormatter(jsonlogger.JsonFormatter):
+    def add_fields(self, log_record, record, message_dict):
+        super().add_fields(log_record, record, message_dict)
+        log_record["timestamp"] = datetime.datetime.now(UTC).isoformat()
+        log_record["level"] = record.levelname
+        log_record["logger"] = record.name
+
+
+def setup_logging():
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+
+    handler = logging.StreamHandler()
+    formatter = CustomJsonFormatter("%(timestamp)s %(level)s %(message)s %(name)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    return logger
+
+
+logger = setup_logging()
 
 
 class ServiceInfo(BaseModel):
@@ -120,8 +145,19 @@ class GetHealthResponse(BaseModel):
 async def lifespan(app: FastAPI):
     app.state.start_time = datetime.datetime.now(UTC)
 
+    logger.info(
+        "Application starting",
+        extra={
+            "event": "startup",
+            "service": app.title,
+            "version": app.version,
+            "debug": app.debug,
+        },
+    )
+
     yield
 
+    logger.info("Application shutting down", extra={"event": "shutdown"})
     app.state.start_time = None
 
 
@@ -134,6 +170,39 @@ app = FastAPI(
     debug=os.getenv("DEBUG", "False").lower() == "true",
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    client_ip = None
+    if request.client:
+        client_ip = request.client.host
+
+    logger.info(
+        "HTTP request",
+        extra={
+            "event": "request",
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": client_ip,
+            "user_agent": request.headers.get("user-agent"),
+        },
+    )
+
+    response = await call_next(request)
+
+    logger.info(
+        "HTTP response",
+        extra={
+            "event": "response",
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": client_ip,
+            "status_code": response.status_code,
+        },
+    )
+
+    return response
 
 
 @app.get("/")
@@ -169,7 +238,16 @@ async def get_health(request: Request) -> GetHealthResponse:
 
 
 @app.exception_handler(status.HTTP_404_NOT_FOUND)
-async def not_found_handler(_request: Request, _exc: Exception) -> JSONResponse:
+async def not_found_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.warning(
+        "Not found error",
+        extra={
+            "event": "error",
+            "error_type": "not_found",
+            "method": request.method,
+            "path": request.url.path,
+        },
+    )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content={"error": "Not Found", "message": "Endpoint does not exist"},
@@ -177,7 +255,17 @@ async def not_found_handler(_request: Request, _exc: Exception) -> JSONResponse:
 
 
 @app.exception_handler(status.HTTP_500_INTERNAL_SERVER_ERROR)
-async def internal_error_handler(_request: Request, _exc: Exception) -> JSONResponse:
+async def internal_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.error(
+        "Internal server error",
+        extra={
+            "event": "error",
+            "error_type": "internal_error",
+            "method": request.method,
+            "path": request.url.path,
+        },
+        exc_info=True,
+    )
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
