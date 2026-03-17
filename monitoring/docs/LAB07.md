@@ -69,7 +69,7 @@ to be done:
 
 **Task 1 Deliverable:**
 
-- <img width=720 src="screenshots/task1-grafana.jpg" />
+- <img width=720 src="screenshots/lab7/task1-grafana.png" />
 
 To generate some test traffic and see logs in action:
 
@@ -143,11 +143,11 @@ what's happening with the application without manual instrumentation.
 
 **Task 2 Deliverables:**
 
-- <img width=720 src="screenshots/task2-grafana.jpg" />
-- <img width=720 src="screenshots/task2-json.jpg" />
-- <img width=720 src="screenshots/task2-question1.jpg" />
-- <img width=720 src="screenshots/task2-question2.jpg" />
-- <img width=720 src="screenshots/task2-question3.jpg" />
+- <img width=720 src="screenshots/lab7/task2-grafana.png" />
+- <img width=720 src="screenshots/lab7/task2-json.png" />
+- <img width=720 src="screenshots/lab7/task2-question1.png" />
+- <img width=720 src="screenshots/lab7/task2-question2.png" />
+- <img width=720 src="screenshots/lab7/task2-question3.png" />
 
 ## Grafana Dashboard
 
@@ -165,7 +165,7 @@ levels across the application.
 
 **Task 3 Deliverable:**
 
-- <img width=720 src="screenshots/task3-dashboard.jpg" />
+- <img width=720 src="screenshots/lab7/task3-dashboard.png" />
 
 ## Production-Ready Configuration
 
@@ -186,8 +186,8 @@ For a more realistic deployment, several hardening measures were added:
 
 **Task 4 Deliverables:**
 
-- <img width=720 src="screenshots/task4.jpg" />
-- <img width=720 src="screenshots/task4-signin.jpg" />
+- <img width=720 src="screenshots/lab7/task4.png" />
+- <img width=720 src="screenshots/lab7/task4-signin.png" />
 
 ## Verification Commands
 

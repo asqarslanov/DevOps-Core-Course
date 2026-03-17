@@ -9,13 +9,21 @@ import multiprocessing
 import os
 import platform
 import socket
+import time
 from contextlib import asynccontextmanager
 from datetime import UTC
 
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+)
 from pydantic import BaseModel
 from pythonjsonlogger import jsonlogger
 
@@ -41,6 +49,30 @@ def setup_logging():
 
 
 logger = setup_logging()
+
+http_requests_total = Counter(
+    "http_requests_total",
+    "Total HTTP requests",
+    ["method", "endpoint", "status"],
+)
+
+http_request_duration_seconds = Histogram(
+    "http_request_duration_seconds",
+    "HTTP request duration in seconds",
+    ["method", "endpoint"],
+    buckets=[0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0],
+)
+
+http_requests_in_progress = Gauge(
+    "http_requests_in_progress",
+    "HTTP requests currently being processed",
+)
+
+endpoint_calls = Counter(
+    "devops_info_endpoint_calls",
+    "Endpoint call count",
+    ["endpoint"],
+)
 
 
 class ServiceInfo(BaseModel):
@@ -174,6 +206,12 @@ app = FastAPI(
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
+    if request.url.path == "/metrics":
+        return await call_next(request)
+
+    http_requests_in_progress.inc()
+    start_time = time.monotonic()
+
     client_ip = None
     if request.client:
         client_ip = request.client.host
@@ -191,6 +229,20 @@ async def log_requests(request: Request, call_next):
 
     response = await call_next(request)
 
+    duration = time.monotonic() - start_time
+    endpoint = request.url.path
+
+    http_requests_total.labels(
+        method=request.method,
+        endpoint=endpoint,
+        status=str(response.status_code),
+    ).inc()
+    http_request_duration_seconds.labels(
+        method=request.method,
+        endpoint=endpoint,
+    ).observe(duration)
+    http_requests_in_progress.dec()
+
     logger.info(
         "HTTP response",
         extra={
@@ -203,6 +255,12 @@ async def log_requests(request: Request, call_next):
     )
 
     return response
+
+
+@app.get("/metrics")
+async def metrics():
+    """Prometheus metrics endpoint."""
+    return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 @app.get("/")
@@ -221,6 +279,9 @@ async def get_index(request: Request) -> GetIndexResponse:
         endpoints=[
             EndpointInfo(path="/", method="GET", description=get_index.__doc__),
             EndpointInfo(path="/health", method="GET", description=get_health.__doc__),
+            EndpointInfo(
+                path="/metrics", method="GET", description="Prometheus metrics"
+            ),
         ],
     )
 
