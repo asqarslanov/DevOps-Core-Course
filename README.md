@@ -1,220 +1,224 @@
 # DevOps Engineering: Core Practices
 
-[![Labs](https://img.shields.io/badge/Labs-18-blue)](#labs)
-[![Exam](https://img.shields.io/badge/Exam-Optional-green)](#exam-alternative)
-[![Duration](https://img.shields.io/badge/Duration-18%20Weeks-lightgrey)](#course-roadmap)
+[![Labs](https://img.shields.io/badge/Labs-18-blue)](#weekly-breakdown)
+[![Exam](https://img.shields.io/badge/Exam-Optional-green)](#exam-replacement)
+[![Duration](https://img.shields.io/badge/Duration-18%20Weeks-lightgrey)](#weekly-breakdown)
 
-Master **production-grade DevOps practices** through hands-on labs. Build, containerize, deploy, monitor, and scale applications using industry-standard tools.
-
----
-
-## Quick Start
-
-1. **Fork** this repository
-2. **Clone** your fork locally
-3. **Start with Lab 1** and progress sequentially
-4. **Submit PRs** for each lab (details below)
+A hands-on, lab-driven course covering the full DevOps lifecycle — from writing code and building containers to deploying on Kubernetes and observing production systems.
 
 ---
 
-## Course Roadmap
+## Getting Started
 
-| Week | Lab | Topic | Key Technologies |
-|------|-----|-------|------------------|
-| 1 | 1 | Web Application Development | Python/Go, Best Practices |
+1. **Fork** this repository to your own GitHub account
+2. **Clone** your fork to your local machine
+3. **Work through labs in order**, starting from Lab 1
+4. **Open Pull Requests** to submit each lab (see [Submission Guide](#submission-guide))
+
+---
+
+## Weekly Breakdown
+
+| Week | Lab | Topic | Technologies |
+|------|-----|-------|-------------|
+| 1 | 1 | Web App Development | Python / Go |
 | 2 | 2 | Containerization | Docker, Multi-stage Builds |
 | 3 | 3 | Continuous Integration | GitHub Actions, Snyk |
-| 4 | 4 | Infrastructure as Code | Terraform, Cloud Providers |
-| 5 | 5 | Configuration Management | Ansible Basics |
-| 6 | 6 | Continuous Deployment | Ansible Advanced |
-| 7 | 7 | Logging | Promtail, Loki, Grafana |
-| 8 | 8 | Monitoring | Prometheus, Grafana |
-| 9 | 9 | Kubernetes Basics | Minikube, Deployments, Services |
-| 10 | 10 | Helm Charts | Templating, Hooks |
+| 4 | 4 | Infrastructure as Code | Terraform |
+| 5 | 5 | Configuration Management | Ansible (Fundamentals) |
+| 6 | 6 | Continuous Deployment | Ansible (Advanced) |
+| 7 | 7 | Centralized Logging | Promtail, Loki, Grafana |
+| 8 | 8 | Application Monitoring | Prometheus, Grafana |
+| 9 | 9 | Kubernetes Fundamentals | Minikube / kind, Deployments, Services |
+| 10 | 10 | Helm Package Management | Charts, Templating, Hooks |
 | 11 | 11 | Secrets Management | K8s Secrets, HashiCorp Vault |
-| 12 | 12 | Configuration & Storage | ConfigMaps, PVCs |
-| 13 | 13 | GitOps | ArgoCD |
+| 12 | 12 | Config & Persistent Storage | ConfigMaps, PVCs |
+| 13 | 13 | GitOps with ArgoCD | Declarative CD |
 | 14 | 14 | Progressive Delivery | Argo Rollouts |
-| 15 | 15 | StatefulSets | Persistent Storage, Headless Services |
-| 16 | 16 | Cluster Monitoring | Kube-Prometheus, Init Containers |
-| — | **Exam Alternative Labs** | | |
-| 17 | 17 | Edge Deployment | Fly.io, Global Distribution |
-| 18 | 18 | Decentralized Storage | 4EVERLAND, IPFS, Web3 |
+| 15 | 15 | Stateful Workloads | StatefulSets, Headless Services |
+| 16 | 16 | Cluster-Level Monitoring | Kube-Prometheus Stack, Init Containers |
+| — | — | *Exam Alternative* | — |
+| 17 | 17 | Edge & Global Deployment | Fly.io |
+| 18 | 18 | Decentralized Storage | 4EVERLAND, IPFS |
 
 ---
 
-## Grading
+## Point System
 
-### Grade Composition
+### How Grades Work
 
 | Component | Weight | Points |
 |-----------|--------|--------|
-| **Labs (16 required)** | 80% | 160 pts |
-| **Final Exam** | 20% | 40 pts |
-| **Bonus Tasks** | Extra | +40 pts max |
-| **Total** | 100% | 200 pts |
+| 16 Core Labs | 80% | 160 pts |
+| Final Exam | 20% | 40 pts |
+| Bonus Tasks | extra credit | up to +40 pts |
+| **Maximum** | — | **200 pts** |
 
-### Exam Alternative
+### Exam Replacement Option
 
-Don't want to take the exam? Complete **both** bonus labs:
+If you prefer not to sit the exam, complete **both** alternative labs:
 
 | Lab | Topic | Points |
 |-----|-------|--------|
-| **Lab 17** | Fly.io Edge Deployment | 20 pts |
-| **Lab 18** | 4EVERLAND & IPFS | 20 pts |
+| Lab 17 | Fly.io Edge Deployment | 20 pts |
+| Lab 18 | 4EVERLAND & IPFS Storage | 20 pts |
 
-**Requirements:**
-- Complete both labs (17 + 18 = 40 pts, replaces exam)
-- Minimum 16/20 on each lab
-- Deadline: **1 week before exam date**
-- Can still take exam if you need more points for desired grade
+**Conditions:**
+- Both labs must be completed (40 pts total, substitutes the exam)
+- Each lab must score at least 16/20
+- Submit by **one week before the exam date**
+- You may still take the exam afterward if you want to boost your total
 
 <details>
-<summary>📊 Grade Scale</summary>
+<summary>📊 Grading Scale</summary>
 
-| Grade | Points | Percentage |
-|-------|--------|------------|
-| **A** | 180-200+ | 90-100% |
-| **B** | 150-179 | 75-89% |
-| **C** | 120-149 | 60-74% |
-| **D** | 0-119 | 0-59% |
+| Letter | Points | Percentage |
+|--------|--------|------------|
+| A | 180–200+ | 90–100% |
+| B | 150–179 | 75–89% |
+| C | 120–149 | 60–74% |
+| D | 0–119 | 0–59% |
 
-**Minimum to Pass:** 120 points (60%)
+**Passing threshold:** 120 points (60%)
 
 </details>
 
 <details>
-<summary>📈 Grade Examples</summary>
+<summary>📈 Worked Examples</summary>
 
-**Scenario 1: Labs + Exam**
+**Path A — Labs plus Exam:**
 ```
-Labs: 16 × 9 = 144 pts
-Bonus: 5 labs × 2.5 = 12.5 pts
-Exam: 35/40 pts
-Total: 191.5 pts = 96% (A)
-```
-
-**Scenario 2: Labs + Exam Alternative**
-```
-Labs: 16 × 9 = 144 pts
-Bonus: 8 labs × 2.5 = 20 pts
-Lab 17: 18 pts
-Lab 18: 17 pts
-Total: 199 pts = 99.5% (A)
+Core labs (16 × 9 avg):     144 pts
+Bonus tasks (5 × 2.5 avg):  12.5 pts
+Exam score:                   35 pts
+                             -------
+Total:                     191.5 pts → 96% → A
 ```
 
-</details>
-
----
-
-## Lab Structure
-
-Each lab is worth **10 points** (main tasks) + **2.5 points** (bonus).
-
-- **Minimum passing score:** 6/10 per lab
-- **Late submissions:** Max 6/10 (within 1 week)
-- **Very late (>1 week):** Not accepted
-
-<details>
-<summary>📋 Lab Categories</summary>
-
-**Foundation (Labs 1-2)**
-- Web app development
-- Docker containerization
-
-**CI/CD & Infrastructure (Labs 3-4)**
-- GitHub Actions
-- Terraform
-
-**Configuration Management (Labs 5-6)**
-- Ansible playbooks and roles
-
-**Observability (Labs 7-8)**
-- Loki logging stack
-- Prometheus monitoring
-
-**Kubernetes Core (Labs 9-12)**
-- K8s basics, Helm
-- Secrets, ConfigMaps
-
-**Advanced Kubernetes (Labs 13-16)**
-- ArgoCD, Argo Rollouts
-- StatefulSets, Monitoring
-
-**Exam Alternative (Labs 17-18)**
-- Fly.io, 4EVERLAND/IPFS
+**Path B — Labs plus Exam Alternative:**
+```
+Core labs (16 × 9 avg):     144 pts
+Bonus tasks (8 × 2.5 avg):  20 pts
+Lab 17:                       18 pts
+Lab 18:                       17 pts
+                             -------
+Total:                      199 pts → 99.5% → A
+```
 
 </details>
 
 ---
 
-## How to Submit
+## Lab Format
+
+Each lab carries **10 points** for the main deliverables and up to **2.5 bonus points**.
+
+- **Passing score per lab:** 6/10
+- **Late (within 1 week):** capped at 6/10
+- **Late (beyond 1 week):** not graded
+
+<details>
+<summary>📋 Labs by Theme</Foundational></summary>
+
+**Foundational (1–2)**
+- Application development basics
+- Docker & containerization
+
+**CI/CD & Infra (3–4)**
+- Pipeline automation with GitHub Actions
+- Provisioning with Terraform
+
+**Config Management (5–6)**
+- Ansible playbooks, roles, and advanced patterns
+
+**Observability (7–8)**
+- Log aggregation (Loki + Promtail)
+- Metrics & alerting (Prometheus + Grafana)
+
+**Kubernetes Core (9–12)**
+- Cluster basics, Deployments, Services
+- Helm, Secrets, ConfigMaps, Storage
+
+**Advanced Kubernetes (13–16)**
+- GitOps (ArgoCD)
+- Canary/blue-green deployments (Argo Rollouts)
+- Stateful workloads, cluster monitoring
+
+**Exam Alternative (17–18)**
+- Fly.io edge computing
+- IPFS / 4EVERLAND decentralized hosting
+
+</details>
+
+---
+
+## Submission Guide
 
 ```bash
-# 1. Create branch
+# Create a feature branch for the lab
 git checkout -b lab1
 
-# 2. Complete lab tasks
+# ... complete the lab tasks ...
 
-# 3. Commit and push
+# Stage, commit, and push
 git add .
-git commit -m "Complete lab1"
+git commit -m "lab1: initial solution"
 git push -u origin lab1
 
-# 4. Create TWO Pull Requests:
-#    PR #1: your-fork:lab1 → course-repo:master
-#    PR #2: your-fork:lab1 → your-fork:master
+# Then open two Pull Requests:
+#   PR 1 → course-repo:master  (for grading)
+#   PR 2 → your-fork:master    (your own history)
 ```
 
 <details>
-<summary>📝 Submission Checklist</summary>
+<summary>✅ Submission Checklist</summary>
 
-- [ ] All main tasks completed
-- [ ] Documentation files created
-- [ ] Screenshots where required
-- [ ] Code tested and working
-- [ ] Markdown validated ([linter](https://dlaa.me/markdownlint/))
-- [ ] Both PRs created
+- [ ] All mandatory tasks implemented
+- [ ] README / documentation written
+- [ ] Screenshots attached where specified
+- [ ] Code runs without errors
+- [ ] Markdown passes [linting](https://dlaa.me/markdownlint/)
+- [ ] Both PRs opened
 
 </details>
 
 ---
 
-## Resources
+## Tooling
 
 <details>
-<summary>🛠️ Required Tools</summary>
+<summary>🛠️ Software You Will Need</summary>
 
-| Tool | Purpose |
-|------|---------|
-| Git | Version control |
-| Docker | Containerization |
-| kubectl | Kubernetes CLI |
-| Helm | K8s package manager |
-| Minikube | Local K8s cluster |
-| Terraform | Infrastructure as Code |
-| Ansible | Configuration management |
+| Tool | Role |
+|------|------|
+| Git | Source control |
+| Docker | Building & running containers |
+| kubectl | Interacting with Kubernetes |
+| Helm | Packaging K8s applications |
+| Minikube / kind | Local Kubernetes cluster |
+| Terraform | Declarative infrastructure |
+| Ansible | Configuration automation |
 
 </details>
 
 <details>
-<summary>📚 Documentation Links</summary>
+<summary>📚 Official Docs</summary>
 
-**Core:**
-- [Docker](https://docs.docker.com/)
-- [Kubernetes](https://kubernetes.io/docs/)
-- [Helm](https://helm.sh/docs/)
+**Containers & Orchestration:**
+- [Docker Docs](https://docs.docker.com/)
+- [Kubernetes Docs](https://kubernetes.io/docs/)
+- [Helm Docs](https://helm.sh/docs/)
 
-**CI/CD:**
+**Automation & CI/CD:**
 - [GitHub Actions](https://docs.github.com/en/actions)
-- [Terraform](https://www.terraform.io/docs)
-- [Ansible](https://docs.ansible.com/)
+- [Terraform Docs](https://www.terraform.io/docs)
+- [Ansible Docs](https://docs.ansible.com/)
 
-**Observability:**
+**Monitoring & Logging:**
 - [Prometheus](https://prometheus.io/docs/)
 - [Grafana](https://grafana.com/docs/)
 
-**Advanced:**
+**GitOps & Delivery:**
 - [ArgoCD](https://argo-cd.readthedocs.io/)
 - [Argo Rollouts](https://argoproj.github.io/argo-rollouts/)
 - [HashiCorp Vault](https://developer.hashicorp.com/vault/docs)
@@ -222,50 +226,49 @@ git push -u origin lab1
 </details>
 
 <details>
-<summary>💡 Tips for Success</summary>
+<summary>💡 Study Tips</summary>
 
-1. **Start early** - Don't wait until deadline
-2. **Read instructions fully** before starting
-3. **Test everything** before submitting
-4. **Document as you go** - Don't leave it for the end
-5. **Ask questions early** - Don't wait until last minute
-6. **Use proper Git workflow** - Branches, commits, PRs
+1. Don't procrastinate — start each lab as soon as it is assigned
+2. Read the entire lab description before writing any code
+3. Verify your work end-to-end before opening a PR
+4. Write documentation incrementally, not at the last minute
+5. Reach out for help early if you are stuck
+6. Follow a clean Git workflow: branches, meaningful commits, PRs
 
 </details>
 
 <details>
-<summary>🔧 Common Issues</summary>
+<summary>🔧 Troubleshooting</summary>
 
-**Docker:**
-- Daemon not running → Start Docker Desktop
-- Permission denied → Add user to docker group
+**Docker issues:**
+- *Daemon not running* → launch Docker Desktop or `systemctl start docker`
+- *Permission denied* → add your user to the `docker` group and re-login
 
-**Minikube:**
-- Won't start → Try `--driver=docker`
-- Resource issues → Allocate more memory/CPU
+**Minikube issues:**
+- *Fails to start* → try `minikube start --driver=docker`
+- *Out of resources* → increase allocated memory/CPU in your VM settings
 
-**Kubernetes:**
-- ImagePullBackOff → Check image name/registry
-- CrashLoopBackOff → Check logs: `kubectl logs <pod>`
+**Kubernetes issues:**
+- *ImagePullBackOff* → verify image name/tag and registry access
+- *CrashLoopBackOff* → inspect with `kubectl logs <pod>` and `kubectl describe pod <pod>`
 
 </details>
 
 ---
 
-## Course Completion
+## What You Will Gain
 
-After completing all 16 core labs (+ optional Labs 17-18), you'll have:
+By the end of this course you will be able to:
 
-✅ Full-stack DevOps expertise
-✅ Production-ready portfolio with 16-18 projects
-✅ Container and Kubernetes mastery
-✅ CI/CD pipeline experience
-✅ Infrastructure as Code skills
-✅ Monitoring and observability knowledge
-✅ GitOps workflow experience
+- Build and containerize applications from scratch
+- Set up CI/CD pipelines that test, scan, and deploy automatically
+- Provision and manage infrastructure using code
+- Deploy, scale, and update workloads on Kubernetes
+- Instrument systems with logging, metrics, and alerting
+- Apply GitOps principles for declarative delivery
 
 ---
 
-**Ready to begin? Start with [Lab 1](labs/lab01.md)!**
+**First step:** open [Lab 1](labs/lab01.md) and begin.
 
-Questions? Check the course Moodle page or ask during office hours.
+For questions, visit the course Moodle page or attend office hours.
