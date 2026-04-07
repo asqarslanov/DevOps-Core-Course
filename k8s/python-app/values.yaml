@@ -53,3 +53,26 @@ strategy:
     maxUnavailable: 0
 
 containerPort: 5000
+
+secrets:
+  enabled: true
+  data:
+    username: "asqarslanov"
+    password: "k8s-s3cur3-p@ssw0rd"
+    api-key: "ak_live_7f3e9a2b1c4d5e6f8a9b0c1d2e3f4a5b"
+
+vault:
+  enabled: false
+  address: "http://vault:8200"
+  role: "python-app"
+  secretsPath: "secret/data/python-app"
+  agent:
+    enabled: true
+    inject: true
+    secretsPath: "/vault/secrets"
+    template: |
+      {{- with secret "secret/data/python-app" -}}
+      APP_USERNAME={{ .Data.data.username }}
+      APP_PASSWORD={{ .Data.data.password }}
+      API_KEY={{ .Data.data.api_key }}
+      {{- end }}
