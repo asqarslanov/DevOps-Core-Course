@@ -1,0 +1,61 @@
+{{- if .Values.vault.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "python-app.fullname" . }}-vault
+  labels:
+    {{- include "python-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "python-app.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: vault
+  strategy:
+    {{- toYaml .Values.strategy | nindent 4 }}
+  template:
+    metadata:
+      labels:
+        {{- include "python-app.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: vault
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "{{ .Values.vault.role }}"
+        vault.hashicorp.com/agent-inject-secret-config: "{{ .Values.vault.secretsPath }}"
+        vault.hashicorp.com/agent-inject-template-config: |
+          {{`{{- with secret "secret/data/python-app" -}}`}}
+          APP_USERNAME={{`{{ .Data.data.username }}`}}
+          APP_PASSWORD={{`{{ .Data.data.password }}`}}
+          API_KEY={{`{{ .Data.data.api_key }}`}}
+          {{`{{- end }}`}}
+        vault.hashicorp.com/agent-pre-populate-only: "false"
+        vault.hashicorp.com/agent-run-as-same-user: "true"
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          env:
+            {{- if .Values.env }}
+            {{- toYaml .Values.env | nindent 12 }}
+            {{- end }}
+            - name: SECRETS_PATH
+              value: "{{ .Values.vault.agent.secretsPath }}"
+          volumeMounts:
+            - name: vault-secrets
+              mountPath: {{ .Values.vault.agent.secretsPath }}
+              readOnly: true
+      volumes:
+        - name: vault-secrets
+          emptyDir:
+            medium: Memory
+{{- end }}
