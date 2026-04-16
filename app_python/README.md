@@ -65,14 +65,19 @@ run. View coverage trends at
 
 Returns comprehensive service and system information.
 
+### `GET /visits`
+
+Return the current number of visits to this API.
+
 ### `GET /health`
 
 Simple health check endpoint.
 
 ## Configuration
 
-| Variable | Default   | Description       |
-| -------- | --------- | ----------------- |
-| `HOST`   | `0.0.0.0` | Host to bind      |
-| `PORT`   | `5000`    | Port to listen    |
-| `DEBUG`  | `False`   | Enable debug mode |
+| Variable      | Default        | Description             |
+| ------------- | -------------- | ----------------------- |
+| `HOST`        | `0.0.0.0`      | Host to bind            |
+| `PORT`        | `5000`         | Port to listen          |
+| `DEBUG`       | `False`        | Enable debug mode       |
+| `VISITS_FILE` | `/data/visits` | Visit counter file path |

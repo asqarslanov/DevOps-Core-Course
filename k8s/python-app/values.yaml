@@ -45,6 +45,8 @@ env:
     value: "0.0.0.0"
   - name: PORT
     value: "5000"
+  - name: VISITS_FILE
+    value: "/data/visits"
 
 strategy:
   type: RollingUpdate
@@ -60,6 +62,17 @@ secrets:
     username: "asqarslanov"
     password: "k8s-s3cur3-p@ssw0rd"
     api-key: "ak_live_7f3e9a2b1c4d5e6f8a9b0c1d2e3f4a5b"
+
+config:
+  appName: "devops-info-service"
+  environment: "dev"
+  logLevel: "INFO"
+
+persistence:
+  enabled: true
+  size: 100Mi
+  accessMode: ReadWriteOnce
+  storageClass: ""
 
 vault:
   enabled: false

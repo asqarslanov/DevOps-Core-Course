@@ -14,7 +14,8 @@ RUN python -m pip install --upgrade pip \
 COPY ./app.py ./
 
 RUN useradd --create-home --shell /bin/bash appuser
-RUN chown -R appuser:appuser /app/
+RUN mkdir -p /data/
+RUN chown -R appuser:appuser /app/ /data/
 USER appuser
 
 EXPOSE 5000

@@ -9,6 +9,7 @@ import multiprocessing
 import os
 import platform
 import socket
+import threading
 import time
 from contextlib import asynccontextmanager
 from datetime import UTC
@@ -73,6 +74,28 @@ endpoint_calls = Counter(
     "Endpoint call count",
     ["endpoint"],
 )
+
+VISITS_FILE = os.getenv("VISITS_FILE", "/tmp/data/visits")
+visits_lock = threading.Lock()
+
+
+def read_visits() -> int:
+    try:
+        with open(VISITS_FILE, "r") as f:
+            return int(f.read().strip())
+    except (FileNotFoundError, ValueError, PermissionError):
+        return 0
+
+
+def write_visits(count: int) -> None:
+    try:
+        os.makedirs(os.path.dirname(VISITS_FILE), exist_ok=True)
+        visits_tmp = f"{VISITS_FILE}.tmp"
+        with open(visits_tmp, "w") as f:
+            f.write(str(count))
+        os.replace(visits_tmp, VISITS_FILE)
+    except PermissionError:
+        logger.warning("Cannot write visits file: permission denied")
 
 
 class ServiceInfo(BaseModel):
@@ -164,7 +187,12 @@ class GetIndexResponse(BaseModel):
     system: SystemInfo
     runtime: RuntimeInfo
     request: RequestInfo
+    visits: int
     endpoints: list[EndpointInfo]
+
+
+class GetVisitsResponse(BaseModel):
+    visits: int
 
 
 class GetHealthResponse(BaseModel):
@@ -266,6 +294,10 @@ async def metrics():
 @app.get("/")
 async def get_index(request: Request) -> GetIndexResponse:
     """Service information"""
+    with visits_lock:
+        visits = read_visits() + 1
+        write_visits(visits)
+
     return GetIndexResponse(
         service=ServiceInfo(
             name=request.app.title,
@@ -276,14 +308,22 @@ async def get_index(request: Request) -> GetIndexResponse:
         system=SystemInfo.get(),
         runtime=RuntimeInfo.get(request.app.state.start_time),
         request=RequestInfo.get(request),
+        visits=visits,
         endpoints=[
             EndpointInfo(path="/", method="GET", description=get_index.__doc__),
+            EndpointInfo(path="/visits", method="GET", description=get_visits.__doc__),
             EndpointInfo(path="/health", method="GET", description=get_health.__doc__),
             EndpointInfo(
                 path="/metrics", method="GET", description="Prometheus metrics"
             ),
         ],
     )
+
+
+@app.get("/visits")
+async def get_visits(_request: Request) -> GetVisitsResponse:
+    """Current visit count"""
+    return GetVisitsResponse(visits=read_visits())
 
 
 @app.get("/health")
