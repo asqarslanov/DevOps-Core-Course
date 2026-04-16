@@ -1,0 +1,27 @@
+services:
+  app-python:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: asqarslanov/devops-python-app:latest
+    container_name: devops-python-app
+    ports:
+      - "5050:5000"
+    volumes:
+      - app-data:/data/
+    environment:
+      - HOST=0.0.0.0
+      - PORT=5000
+      - VISITS_FILE=/data/visits
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - 'python -c "import urllib.request; urllib.request.urlopen(''http://localhost:5000/health'')"'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  app-data:
