@@ -1,0 +1,14 @@
+statefulset:
+  enabled: true
+
+initContainers:
+  enabled: true
+
+serviceMonitor:
+  enabled: true
+  prometheusRelease: monitoring
+
+replicaCount: 3
+
+persistence:
+  enabled: true
