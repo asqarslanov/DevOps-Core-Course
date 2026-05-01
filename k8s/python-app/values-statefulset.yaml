@@ -1,0 +1,7 @@
+statefulset:
+  enabled: true
+
+replicaCount: 3
+
+persistence:
+  enabled: true
