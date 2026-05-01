@@ -23,6 +23,40 @@ All naming and labeling logic is delegated to the shared library chart.
 {{- include "common.selectorLabels" . }}
 {{- end }}
 
+{{- define "python-app.waitForServiceHost" -}}
+{{- if .Values.initContainers.waitForService.host }}
+{{- .Values.initContainers.waitForService.host }}
+{{- else }}
+{{- printf "%s.%s.svc.cluster.local" (include "python-app.fullname" .) .Release.Namespace }}
+{{- end }}
+{{- end }}
+
+{{- define "python-app.initContainers" -}}
+- name: init-download
+  image: {{ .Values.initContainers.download.image | quote }}
+  command:
+    - sh
+    - -c
+    - >-
+      wget -q -O /work-dir/{{ .Values.initContainers.download.filename }}
+      {{ .Values.initContainers.download.url | quote }}
+      && echo "downloaded to /work-dir/{{ .Values.initContainers.download.filename }}"
+  volumeMounts:
+    - name: init-workdir
+      mountPath: /work-dir/
+- name: init-wait-service
+  image: {{ .Values.initContainers.waitForService.image | quote }}
+  command:
+    - sh
+    - -c
+    - |
+      set -eu
+      HOST="{{ include "python-app.waitForServiceHost" . }}"
+      echo "waiting for DNS: ${HOST}"
+      until nslookup "${HOST}" >/dev/null 2>&1; do sleep 2; done
+      echo "DNS ready for ${HOST}"
+{{- end }}
+
 {{/*
 Common environment variables for the application.
 Usage: {{ include "python-app.envVars" . }}
