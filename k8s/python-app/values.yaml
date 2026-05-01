@@ -110,3 +110,11 @@ rollout:
   blueGreen:
     autoPromotionEnabled: false
     autoPromotionSeconds: 0
+
+statefulset:
+  enabled: false
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
