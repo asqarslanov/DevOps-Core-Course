@@ -1,0 +1,392 @@
+"""
+DevOps Info Service
+Main application module
+"""
+
+import datetime
+import logging
+import multiprocessing
+import os
+import platform
+import socket
+import threading
+import time
+from contextlib import asynccontextmanager
+from datetime import UTC
+
+import uvicorn
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse, PlainTextResponse
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+)
+from pydantic import BaseModel
+from pythonjsonlogger import jsonlogger
+
+
+class CustomJsonFormatter(jsonlogger.JsonFormatter):
+    def add_fields(self, log_record, record, message_dict):
+        super().add_fields(log_record, record, message_dict)
+        log_record["timestamp"] = datetime.datetime.now(UTC).isoformat()
+        log_record["level"] = record.levelname
+        log_record["logger"] = record.name
+
+
+def setup_logging():
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+
+    handler = logging.StreamHandler()
+    formatter = CustomJsonFormatter("%(timestamp)s %(level)s %(message)s %(name)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    return logger
+
+
+logger = setup_logging()
+
+http_requests_total = Counter(
+    "http_requests_total",
+    "Total HTTP requests",
+    ["method", "endpoint", "status"],
+)
+
+http_request_duration_seconds = Histogram(
+    "http_request_duration_seconds",
+    "HTTP request duration in seconds",
+    ["method", "endpoint"],
+    buckets=[0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0],
+)
+
+http_requests_in_progress = Gauge(
+    "http_requests_in_progress",
+    "HTTP requests currently being processed",
+)
+
+endpoint_calls = Counter(
+    "devops_info_endpoint_calls",
+    "Endpoint call count",
+    ["endpoint"],
+)
+
+VISITS_FILE = os.getenv("VISITS_FILE", "/tmp/data/visits")
+visits_lock = threading.Lock()
+
+
+def read_visits() -> int:
+    try:
+        with open(VISITS_FILE, "r") as f:
+            return int(f.read().strip())
+    except (FileNotFoundError, ValueError, PermissionError):
+        return 0
+
+
+def write_visits(count: int) -> None:
+    try:
+        os.makedirs(os.path.dirname(VISITS_FILE), exist_ok=True)
+        visits_tmp = f"{VISITS_FILE}.tmp"
+        with open(visits_tmp, "w") as f:
+            f.write(str(count))
+        os.replace(visits_tmp, VISITS_FILE)
+    except PermissionError:
+        logger.warning("Cannot write visits file: permission denied")
+
+
+class ServiceInfo(BaseModel):
+    name: str
+    version: str
+    description: str
+    framework: str
+
+
+class SystemInfo(BaseModel):
+    hostname: str
+    platform: str
+    platform_version: str
+    architecture: str
+    cpu_count: int
+    python_version: str
+
+    @staticmethod
+    def get() -> "SystemInfo":
+        return SystemInfo(
+            hostname=socket.gethostname(),
+            platform=platform.system(),
+            platform_version=platform.release(),
+            architecture=platform.machine(),
+            cpu_count=multiprocessing.cpu_count(),
+            python_version=platform.python_version(),
+        )
+
+
+class UptimeInfo(BaseModel):
+    seconds: int
+    human: str
+
+    @staticmethod
+    def get(start_time: datetime.datetime) -> "UptimeInfo":
+        delta = datetime.datetime.now(UTC) - start_time
+        seconds = int(delta.total_seconds())
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        return UptimeInfo(seconds=seconds, human=f"{hours} hours, {minutes} minutes")
+
+
+class RuntimeInfo(BaseModel):
+    uptime_seconds: int
+    uptime_human: str
+    current_time: datetime.datetime
+    timezone: str = "UTC"
+
+    @staticmethod
+    def get(start_time: datetime.datetime) -> "RuntimeInfo":
+        current_time = datetime.datetime.now(UTC)
+        uptime = UptimeInfo.get(start_time)
+
+        return RuntimeInfo(
+            uptime_seconds=uptime.seconds,
+            uptime_human=uptime.human,
+            current_time=current_time,
+        )
+
+
+class RequestInfo(BaseModel):
+    client_ip: str | None
+    user_agent: str | None
+    method: str
+    path: str
+
+    @staticmethod
+    def get(request: Request) -> "RequestInfo":
+        client_ip = None
+        if request.client:
+            client_ip = request.client.host
+
+        return RequestInfo(
+            client_ip=client_ip,
+            user_agent=request.headers.get("user-agent"),
+            method=request.method,
+            path=request.url.path,
+        )
+
+
+class EndpointInfo(BaseModel):
+    path: str
+    method: str
+    description: str | None
+
+
+class GetIndexResponse(BaseModel):
+    service: ServiceInfo
+    system: SystemInfo
+    runtime: RuntimeInfo
+    request: RequestInfo
+    visits: int
+    endpoints: list[EndpointInfo]
+
+
+class GetVisitsResponse(BaseModel):
+    visits: int
+
+
+class GetHealthResponse(BaseModel):
+    status: str
+    timestamp: datetime.datetime
+    uptime_seconds: int
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.start_time = datetime.datetime.now(UTC)
+
+    logger.info(
+        "Application starting",
+        extra={
+            "event": "startup",
+            "service": app.title,
+            "version": app.version,
+            "debug": app.debug,
+        },
+    )
+
+    yield
+
+    logger.info("Application shutting down", extra={"event": "shutdown"})
+    app.state.start_time = None
+
+
+load_dotenv()
+
+app = FastAPI(
+    title="devops-info-service",
+    version="1.0.0",
+    description="DevOps Info Service - Provides system information and health status",
+    debug=os.getenv("DEBUG", "False").lower() == "true",
+    lifespan=lifespan,
+)
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    if request.url.path == "/metrics":
+        return await call_next(request)
+
+    http_requests_in_progress.inc()
+    start_time = time.monotonic()
+
+    client_ip = None
+    if request.client:
+        client_ip = request.client.host
+
+    logger.info(
+        "HTTP request",
+        extra={
+            "event": "request",
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": client_ip,
+            "user_agent": request.headers.get("user-agent"),
+        },
+    )
+
+    response = await call_next(request)
+
+    duration = time.monotonic() - start_time
+    endpoint = request.url.path
+
+    http_requests_total.labels(
+        method=request.method,
+        endpoint=endpoint,
+        status=str(response.status_code),
+    ).inc()
+    http_request_duration_seconds.labels(
+        method=request.method,
+        endpoint=endpoint,
+    ).observe(duration)
+    http_requests_in_progress.dec()
+
+    logger.info(
+        "HTTP response",
+        extra={
+            "event": "response",
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": client_ip,
+            "status_code": response.status_code,
+        },
+    )
+
+    return response
+
+
+@app.get("/metrics")
+async def metrics():
+    """Prometheus metrics endpoint."""
+    return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
+@app.get("/")
+async def get_index(request: Request) -> GetIndexResponse:
+    """Service information"""
+    with visits_lock:
+        visits = read_visits() + 1
+        write_visits(visits)
+
+    return GetIndexResponse(
+        service=ServiceInfo(
+            name=request.app.title,
+            version=request.app.version,
+            description="DevOps course info service",
+            framework="FastAPI",
+        ),
+        system=SystemInfo.get(),
+        runtime=RuntimeInfo.get(request.app.state.start_time),
+        request=RequestInfo.get(request),
+        visits=visits,
+        endpoints=[
+            EndpointInfo(path="/", method="GET", description=get_index.__doc__),
+            EndpointInfo(path="/visits", method="GET", description=get_visits.__doc__),
+            EndpointInfo(path="/health", method="GET", description=get_health.__doc__),
+            EndpointInfo(
+                path="/metrics", method="GET", description="Prometheus metrics"
+            ),
+        ],
+    )
+
+
+@app.get("/visits")
+async def get_visits(_request: Request) -> GetVisitsResponse:
+    """Current visit count"""
+    return GetVisitsResponse(visits=read_visits())
+
+
+@app.get("/health")
+async def get_health(request: Request) -> GetHealthResponse:
+    """Health check"""
+    runtime_info = RuntimeInfo.get(request.app.state.start_time)
+
+    return GetHealthResponse(
+        status="healthy",
+        timestamp=datetime.datetime.now(UTC),
+        uptime_seconds=runtime_info.uptime_seconds,
+    )
+
+
+@app.exception_handler(status.HTTP_404_NOT_FOUND)
+async def not_found_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.warning(
+        "Not found error",
+        extra={
+            "event": "error",
+            "error_type": "not_found",
+            "method": request.method,
+            "path": request.url.path,
+        },
+    )
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"error": "Not Found", "message": "Endpoint does not exist"},
+    )
+
+
+@app.exception_handler(status.HTTP_500_INTERNAL_SERVER_ERROR)
+async def internal_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.error(
+        "Internal server error",
+        extra={
+            "event": "error",
+            "error_type": "internal_error",
+            "method": request.method,
+            "path": request.url.path,
+        },
+        exc_info=True,
+    )
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "error": "Internal Server Error",
+            "message": "An unexpected error occurred",
+        },
+    )
+
+
+def main() -> None:
+    debug = os.getenv("DEBUG", "False").lower() == "true"
+    uvicorn.run(
+        "app:app",
+        host=os.getenv("HOST", "0.0.0.0"),
+        port=int(os.getenv("PORT", "5000")),
+        reload=debug,
+        log_level="debug" if debug else "info",
+        access_log=True,
+    )
+
+
+if __name__ == "__main__":
+    main()
